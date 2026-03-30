@@ -8,7 +8,6 @@ namespace Lab8.Blue
             private string _surname;
             private int[,] _marks;
             private int _jumpCounter;
-
             public string Name => _name;
             public string Surname => _surname;
 
@@ -17,7 +16,6 @@ namespace Lab8.Blue
                 get
                 {
                     if (_marks == null) return new int[0, 0];
-
                     int[,] copy = new int[_marks.GetLength(0), _marks.GetLength(1)];
                     Array.Copy(_marks, copy, _marks.Length);
                     return copy;
@@ -28,7 +26,6 @@ namespace Lab8.Blue
                 get
                 {
                     if (_marks == null) return 0;
-
                     int sum = 0;
                     foreach (int mark in _marks)
                     {
@@ -57,7 +54,6 @@ namespace Lab8.Blue
             public static void Sort(Participant[] array)
             {
                 if (array == null || array.Length <= 1) return;
-
                 for (int i = 0; i < array.Length - 1; i++)
                 {
                     for (int j = 0; j < array.Length - 1 - i; j++)
@@ -71,10 +67,10 @@ namespace Lab8.Blue
                     }
                 }
             }
+
             public void Print()
             {
                 Console.Write($"{Name} {Surname} {TotalScore} ");
-
                 if (_marks != null)
                 {
                     for (int i = 0; i < _marks.GetLength(0); i++)
@@ -92,45 +88,59 @@ namespace Lab8.Blue
         {
             private string _name;
             private int _bank;
-            
-            protected List<Participant> _participants;
-            
+            protected Participant[] _participants;
+            protected int _participantCount;
             public string Name => _name;
             public int Bank => _bank;
-            public Participant[] Participants => _participants.ToArray();
-            
+            public Participant[] Participants
+            {
+                get
+                {
+                    Participant[] copy = new Participant[_participantCount];
+                    Array.Copy(_participants, copy, _participantCount);
+                    return copy;
+                }
+            }
             public abstract double[] Prize { get; }
-            
             protected WaterJump(string name, int bank)
             {
                 _name = name;
                 _bank = bank;
-                _participants = new List<Participant>();
+                _participants = new Participant[100];
+                _participantCount = 0;
             }
             public void Add(Participant participant)
             {
-                if (participant != null)
+                if (participant != null && _participantCount < _participants.Length)
                 {
-                    _participants.Add(participant);
+                    _participants[_participantCount] = participant;
+                    _participantCount++;
                 }
             }
             public void Add(Participant[] participants)
             {
-                if (participants != null)
+                if (participants == null) return;
+
+                for (int i = 0; i < participants.Length; i++)
                 {
-                    _participants.AddRange(participants);
+                    if (_participantCount < _participants.Length)
+                    {
+                        _participants[_participantCount] = participants[i];
+                        _participantCount++;
+                    }
+                    else break;
                 }
             }
         }
         public class WaterJump3m : WaterJump
         {
             public WaterJump3m(string name, int bank) : base(name, bank) { }
-
+            
             public override double[] Prize
             {
                 get
                 {
-                    if (_participants.Count < 3)
+                    if (_participantCount < 3)
                         return new double[0];
 
                     double[] prizes = new double[3];
@@ -144,12 +154,12 @@ namespace Lab8.Blue
         public class WaterJump5m : WaterJump
         {
             public WaterJump5m(string name, int bank) : base(name, bank) { }
-
+            
             public override double[] Prize
             {
                 get
                 {
-                    int participantCount = _participants.Count;
+                    int participantCount = _participantCount;
                     if (participantCount < 3)
                         return new double[0];
                     int countAboveMiddle = participantCount / 2;
